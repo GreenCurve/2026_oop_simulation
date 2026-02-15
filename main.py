@@ -14,10 +14,10 @@ class Lifeform:
     
     def __init__(self, location = None):
         self.location = location
-        self._r = random.randint(0,255)
-        self._g = random.randint(0,255)
-        self._b = random.randint(0,255)
-        self.symbol = f"\x1b[38;2;{self._r};{self._g};{self._b}m{random.choice(string.ascii_letters)}\x1b[0m"
+        self._r = 225
+        self._g = 0
+        self._b = 0
+        self.symbol = random.choice(string.ascii_letters)
         
     def act(self, map):
         self.move(map)
@@ -55,7 +55,7 @@ class Lifeform:
             
     
     def render(self):
-        return(self.symbol)
+        return(self.symbol,self._r,self._g,self._b)
     
 class Grass(Lifeform):
     """
@@ -103,12 +103,18 @@ class Cell:
         self.y = y
         self.state = "."
         self.inhabitant = None
+        self.vegetation = None
         
     def render(self):
-        if (self.inhabitant):
-            return self.inhabitant.render()
-        else:
-            return self.state
+            symbol, red, green, blue = '.', 225, 225, 255
+            if (self.inhabitant):
+                symbol, red, green, blue = self.inhabitant.render()
+            bg_code = ""
+            if self.vegetation:
+                bg_red, bg_green, bg_blue = 50, 112, 50
+                bg_code = f"\x1b[48;2;{bg_red};{bg_green};{bg_blue}m"
+            render = f"{bg_code}\x1b[1m\x1b[38;2;{red};{green};{blue}m{symbol}\x1b[0m"
+            return render
 
 class Simulation:
     
@@ -146,6 +152,12 @@ class Simulation:
         time.sleep(self.time_step)
         for lifeform in self.lifeforms:
             lifeform.act(self.map)
+        for cell_row in self.map.cells.values():
+            for cell in cell_row.values():
+                if not cell.vegetation:
+                    chance = random. randint(0, 100)
+                    if chance > 66:
+                        cell.vegetation = True
     
     def render(self):
         self._dynamic_terminal.render(["Round " + str(self.current_iter),self.map.render()],self.map_size+2)
@@ -178,6 +190,6 @@ class DynamicTerminal:
         self.rewrite_lines(text)
         
 if __name__ == "__main__":
-    sim = Simulation(iterations=50,map_size = 30,lifeform_count = 50)
+    sim = Simulation(iterations=50,map_size = 30,lifeform_count = 10,timestep=1)
     while(not sim.terminated):
         sim.step()
