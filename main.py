@@ -111,7 +111,7 @@ class Cell:
                 symbol, red, green, blue = self.inhabitant.render()
             bg_code = ""
             if self.vegetation:
-                bg_red, bg_green, bg_blue = 50, 112, 50
+                bg_red, bg_green, bg_blue = 20, 70, 20
                 bg_code = f"\x1b[48;2;{bg_red};{bg_green};{bg_blue}m"
             render = f"{bg_code}\x1b[1m\x1b[38;2;{red};{green};{blue}m{symbol}\x1b[0m"
             return render
